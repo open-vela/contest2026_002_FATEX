@@ -1,0 +1,192 @@
+<template>
+  <div class="page-container">
+    <div class="avatar-section">
+      <div class="avatar">
+        <text class="avatar-face">(X)</text>
+      </div>
+    </div>
+    <div class="color-section">
+      <text class="section-title">选择颜色</text>
+      <div class="color-row">
+        <div class="color-item" @click="selectColor('#000000')" style="background-color: #000000;"></div>
+        <div class="color-item" @click="selectColor('#FF3B30')" style="background-color: #FF3B30;"></div>
+        <div class="color-item" @click="selectColor('#FF9500')" style="background-color: #FF9500;"></div>
+        <div class="color-item" @click="selectColor('#FFCC00')" style="background-color: #FFCC00;"></div>
+      </div>
+      <div class="color-row">
+        <div class="color-item" @click="selectColor('#34C759')" style="background-color: #34C759;"></div>
+        <div class="color-item" @click="selectColor('#007AFF')" style="background-color: #007AFF;"></div>
+        <div class="color-item" @click="selectColor('#5856D6')" style="background-color: #5856D6;"></div>
+        <div class="color-item" @click="selectColor('#AF52DE')" style="background-color: #AF52DE;"></div>
+      </div>
+    </div>
+    <div class="width-section">
+      <text class="section-title">线条粗细</text>
+      <div class="width-row">
+        <div class="width-item" @click="selectWidth(1)">
+          <div class="width-preview" style="height: 2px;"></div>
+        </div>
+        <div class="width-item" @click="selectWidth(2)">
+          <div class="width-preview" style="height: 4px;"></div>
+        </div>
+        <div class="width-item" @click="selectWidth(3)">
+          <div class="width-preview" style="height: 6px;"></div>
+        </div>
+        <div class="width-item" @click="selectWidth(5)">
+          <div class="width-preview" style="height: 10px;"></div>
+        </div>
+        <div class="width-item" @click="selectWidth(8)">
+          <div class="width-preview" style="height: 16px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="save-section">
+      <div class="save-btn" @click="saveSettings">
+        <text class="save-text">完成</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+.page-container {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  background-color: #F2F2F7;
+}
+.avatar-section {
+  margin-top: 60px;
+  align-items: center;
+  margin-bottom: 40px;
+}
+.avatar {
+  width: 80px;
+  height: 80px;
+  background-color: #FFFFFF;
+  border-radius: 40px;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-face {
+  font-size: 32px;
+  color: #000000;
+}
+.color-section {
+  margin-left: 24px;
+  margin-right: 24px;
+  margin-bottom: 30px;
+}
+.section-title {
+  font-size: 14px;
+  color: #8E8E93;
+  margin-bottom: 16px;
+}
+.color-row {
+  flex-direction: row;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.color-item {
+  width: 36px;
+  height: 36px;
+  margin-left: 6px;
+  margin-right: 6px;
+  border-radius: 18px;
+}
+.width-section {
+  margin-left: 24px;
+  margin-right: 24px;
+  margin-bottom: 40px;
+}
+.width-row {
+  flex-direction: row;
+  justify-content: center;
+}
+.width-item {
+  width: 48px;
+  height: 48px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  align-items: center;
+  justify-content: center;
+}
+.width-preview {
+  width: 24px;
+  background-color: #000000;
+}
+.save-section {
+  flex: 1;
+  margin-left: 24px;
+  margin-right: 24px;
+  margin-bottom: 60px;
+  justify-content: flex-end;
+}
+.save-btn {
+  height: 50px;
+  background-color: #000000;
+  align-items: center;
+  justify-content: center;
+}
+.save-text {
+  font-size: 18px;
+  color: #FFFFFF;
+}
+</style>
+
+<script>
+import prompt from '@system.prompt'
+import router from '@system.router'
+import storage from '@system.storage'
+
+export default {
+  data: {
+    currentColor: '#000000',
+    lineWidth: 3
+  },
+  onInit() {
+    this.loadSettings()
+  },
+  onShow() {
+    this.loadSettings()
+  },
+  selectColor(color) {
+    this.currentColor = color
+    prompt.showToast({ message: '颜色: ' + color })
+  },
+  selectWidth(width) {
+    this.lineWidth = width
+    prompt.showToast({ message: '粗细: ' + width })
+  },
+  saveSettings() {
+    storage.set({
+      key: 'drawSettings',
+      value: JSON.stringify({
+        color: this.currentColor,
+        lineWidth: this.lineWidth
+      }),
+      success: () => {
+        console.log('设置已保存')
+      },
+      fail: (err) => {
+        console.error('保存失败:', err)
+      }
+    })
+    router.back()
+  },
+  loadSettings() {
+    storage.get({
+      key: 'drawSettings',
+      success: (data) => {
+        if (data) {
+          const settings = JSON.parse(data)
+          this.currentColor = settings.color || '#000000'
+          this.lineWidth = settings.lineWidth || 3
+        }
+      }
+    })
+  }
+}
+</script>

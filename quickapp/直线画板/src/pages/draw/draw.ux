@@ -1,0 +1,193 @@
+<template>
+  <div class="page-container">
+    <div class="canvas-card">
+      <div class="draw-area" @touchstart="onTouchStart" @touchend="onTouchEnd">
+        <div
+          for="{{lines}}"
+          class="line {{itemClass($item)}}"
+          style="top:{{$item.top}}px;left:{{$item.left}}px;width:{{$item.width}}px;height:{{$item.height}}px;background-color:{{$item.color}};border-radius:{{$item.radius}}px;"
+        ></div>
+      </div>
+      <div class="card-bottom-icons">
+        <div class="icon-btn" @click="showSettings">
+          <text class="icon-text">≡</text>
+        </div>
+        <div class="icon-btn" @click="addNew">
+          <text class="icon-text">+</text>
+        </div>
+      </div>
+    </div>
+    <div class="mascot-btn" @click="showMascot">
+      <text class="mascot-face">(X)</text>
+    </div>
+  </div>
+</template>
+
+<style>
+@import '../../common/deg.css';
+
+.page-container {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #F2F2F7;
+}
+.canvas-card {
+  width: 314px;
+  height: 314px;
+  background-color: #FFFFFF;
+  border-radius: 48px;
+  flex-direction: column;
+}
+.draw-area {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.line {
+  position: absolute;
+  transform-origin: left center;
+}
+.card-bottom-icons {
+  height: 50px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  margin-left: 20px;
+  margin-right: 20px;
+  align-items: center;
+  justify-content: center;
+}
+.icon-text {
+  font-size: 24px;
+  color: #000000;
+}
+.mascot-btn {
+  margin-top: 30px;
+  width: 60px;
+  height: 60px;
+  background-color: #FFFFFF;
+  border-radius: 30px;
+  align-items: center;
+  justify-content: center;
+}
+.mascot-face {
+  font-size: 20px;
+  color: #000000;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import prompt from '@system.prompt'
+import storage from '@system.storage'
+
+export default {
+  data: {
+    lines: [],
+    hasStart: false,
+    startX: 0,
+    startY: 0,
+    lineColor: '#000000',
+    lineWidth: 3
+  },
+  onInit() {
+    this.loadSettings()
+  },
+  onShow() {
+    this.loadSettings()
+  },
+  itemClass(item) {
+    return 'deg-' + Math.round(item.angle)
+  },
+  onTouchStart(e) {
+    const touch = e.touches[0]
+    const x = touch.offsetX
+    const y = touch.offsetY
+
+    if (!this.hasStart) {
+      this.startX = x
+      this.startY = y
+      this.hasStart = true
+    } else {
+      this.hasStart = false
+      this.addLine(this.startX, this.startY, x, y, this.lineColor)
+    }
+  },
+  onTouchEnd() {},
+  addLine(x1, y1, x2, y2, color) {
+    const dx = x2 - x1
+    const dy = y2 - y1
+    const length = Math.sqrt(dx * dx + dy * dy)
+    
+    if (length < 5) return
+
+    let angle = Math.atan2(dy, dx) * 180 / Math.PI
+    if (angle < 0) {
+      angle += 360
+    }
+    
+    const halfH = this.lineWidth / 2
+
+    const left = x1
+    const top = y1 - halfH
+
+    this.lines = [...this.lines, {
+      left,
+      top,
+      width: length,
+      height: this.lineWidth,
+      color,
+      angle,
+      radius: halfH
+    }]
+    
+    this.saveLines()
+  },
+  showSettings() {
+    router.push({ uri: '/pages/settings' })
+  },
+  addNew() {
+    this.lines = []
+    this.hasStart = false
+    this.saveLines()
+    prompt.showToast({ message: '新建画布' })
+  },
+  showMascot() {
+    prompt.showToast({ message: '直线画板' })
+  },
+  saveLines() {
+    storage.set({
+      key: 'drawLines',
+      value: JSON.stringify(this.lines)
+    })
+  },
+  loadSettings() {
+    storage.get({
+      key: 'drawSettings',
+      success: (data) => {
+        if (data) {
+          const settings = JSON.parse(data)
+          this.lineColor = settings.color || '#000000'
+          this.lineWidth = settings.lineWidth || 3
+        }
+      }
+    })
+    storage.get({
+      key: 'drawLines',
+      success: (data) => {
+        if (data) {
+          this.lines = JSON.parse(data)
+        }
+      }
+    })
+  }
+}
+</script>

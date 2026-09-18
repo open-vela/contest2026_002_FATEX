@@ -1,0 +1,149 @@
+<template>
+  <div class="page-container" @touchstart="onTouchStart" @touchend="onTouchEnd">
+    <div class="header">
+      <text class="header-title">图层列表</text>
+      <text class="header-subtitle">已绘制 {{lines.length}} 条直线</text>
+    </div>
+    <list class="layer-list">
+      <list-item
+        type="layer"
+        for="{{lines}}"
+      >
+        <div class="item-content">
+          <div class="item-avatar">
+            <text class="avatar-text">{{$index + 1}}</text>
+          </div>
+          <div class="item-info">
+            <text class="item-name">直线 {{$index + 1}}</text>
+            <text class="item-id">{{Math.round($item.width)}} × {{Math.round($item.height)}}</text>
+          </div>
+        </div>
+      </list-item>
+    </list>
+    <div class="bottom-actions">
+      <div class="save-btn" @click="goBack">
+        <text class="btn-text">返回</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+.page-container {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  background-color: #FFFFFF;
+}
+.header {
+  padding-top: 60px;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-bottom: 20px;
+}
+.header-title {
+  font-size: 24px;
+  color: #000000;
+}
+.header-subtitle {
+  font-size: 14px;
+  color: #8E8E93;
+  margin-top: 4px;
+}
+.layer-list {
+  flex: 1;
+}
+.item-content {
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background-color: #F2F2F7;
+  flex-direction: row;
+  align-items: center;
+}
+.item-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: #000000;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-text {
+  font-size: 16px;
+  color: #FFFFFF;
+}
+.item-info {
+  flex: 1;
+  margin-left: 12px;
+}
+.item-name {
+  font-size: 16px;
+  color: #000000;
+}
+.item-id {
+  font-size: 12px;
+  color: #8E8E93;
+  margin-top: 2px;
+}
+.bottom-actions {
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 40px;
+}
+.save-btn {
+  height: 48px;
+  background-color: #000000;
+  align-items: center;
+  justify-content: center;
+}
+.btn-text {
+  font-size: 16px;
+  color: #FFFFFF;
+}
+</style>
+
+<script>
+import prompt from '@system.prompt'
+import storage from '@system.storage'
+import router from '@system.router'
+
+export default {
+  data: {
+    lines: [],
+    touchStartX: 0,
+    touchStartY: 0,
+    swipeThreshold: 80
+  },
+  onInit() {
+    this.loadLines()
+  },
+  onTouchStart(e) {
+    const touch = e.touches[0]
+    this.touchStartX = touch.clientX
+    this.touchStartY = touch.clientY
+  },
+  onTouchEnd(e) {
+    const touch = e.changedTouches[0]
+    const deltaX = touch.clientX - this.touchStartX
+    const deltaY = Math.abs(touch.clientY - this.touchStartY)
+    if (deltaX > this.swipeThreshold && deltaY < 60) {
+      router.back()
+    }
+  },
+  goBack() {
+    router.back()
+  },
+  loadLines() {
+    storage.get({
+      key: 'drawLines',
+      success: (data) => {
+        if (data) {
+          this.lines = JSON.parse(data)
+        }
+      }
+    })
+  }
+}
+</script>

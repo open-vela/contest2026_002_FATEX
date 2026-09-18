@@ -1,0 +1,106 @@
+<template>
+  <div class="page-container" @touchstart="onTouchStart" @touchend="onTouchEnd">
+    <div class="save-modal">
+      <div class="modal-header">
+        <text class="modal-title">保存作品</text>
+      </div>
+      <div class="modal-body">
+        <div class="save-option" @click="saveToLocal">
+          <text class="option-icon">💾</text>
+          <text class="option-text">保存到本地</text>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="cancel-btn" @click="cancel">
+          <text class="cancel-text">取消</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+.page-container {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+}
+.save-modal {
+  width: 280px;
+  background-color: #FFFFFF;
+}
+.modal-header {
+  padding: 20px;
+}
+.modal-title {
+  font-size: 18px;
+  color: #000000;
+}
+.modal-body {
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 16px;
+}
+.save-option {
+  padding: 16px;
+  flex-direction: row;
+  align-items: center;
+  background-color: #F2F2F7;
+  margin-bottom: 12px;
+}
+.option-icon {
+  font-size: 24px;
+  margin-right: 12px;
+}
+.option-text {
+  font-size: 16px;
+  color: #000000;
+}
+.modal-footer {
+  padding: 16px;
+}
+.cancel-btn {
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.cancel-text {
+  font-size: 16px;
+  color: #8E8E93;
+}
+</style>
+
+<script>
+import prompt from '@system.prompt'
+import router from '@system.router'
+
+export default {
+  data: {
+    touchStartX: 0,
+    touchStartY: 0,
+    swipeThreshold: 80
+  },
+  onTouchStart(e) {
+    const touch = e.touches[0]
+    this.touchStartX = touch.clientX
+    this.touchStartY = touch.clientY
+  },
+  onTouchEnd(e) {
+    const touch = e.changedTouches[0]
+    const deltaX = touch.clientX - this.touchStartX
+    const deltaY = Math.abs(touch.clientY - this.touchStartY)
+    if (deltaX > this.swipeThreshold && deltaY < 60) {
+      router.back()
+    }
+  },
+  saveToLocal() {
+    prompt.showToast({ message: '已保存到本地' })
+    router.back()
+  },
+  cancel() {
+    router.back()
+  }
+}
+</script>

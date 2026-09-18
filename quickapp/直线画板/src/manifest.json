@@ -1,0 +1,39 @@
+{
+  "package": "com.huaban.draw",
+  "name": "直线画板",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "minPlatformVersion": 1000,
+  "icon": "/common/logo.png",
+  "deviceTypeList": [
+    "watch",
+    "phone"
+  ],
+  "features": [
+    { "name": "system.router" },
+    { "name": "system.app" },
+    { "name": "system.storage" },
+    { "name": "system.prompt" }
+  ],
+  "config": {
+    "logLevel": "log",
+    "designWidth": "device-width"
+  },
+  "router": {
+    "entry": "pages/draw",
+    "pages": {
+      "pages/draw": {
+        "component": "draw"
+      },
+      "pages/layers": {
+        "component": "layers"
+      },
+      "pages/save": {
+        "component": "save"
+      },
+      "pages/settings": {
+        "component": "settings"
+      }
+    }
+  }
+}
